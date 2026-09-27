@@ -1,4 +1,51 @@
-<svg width="54" height="70" viewBox="0 0 54 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M24.386 8.817c4.972-4.868 12.948-4.785 17.816.186 4.869 4.971 4.785 12.948-.186 17.816q-.506.494-.987.867L23.508 9.794q.372-.481.878-.977M11.97 42.611c-4.941 4.9-4.974 12.877-.075 17.817 4.9 4.94 12.877 4.974 17.817.074q.502-.5.88-.975L12.96 41.747a10 10 0 0 0-.99.864" fill="#1e2939"/>
-  <rect y="22.652" width="21.312" height="55.056" rx="10.656" transform="rotate(-45 0 22.652)" fill="#1e2939"/>
+<svg width="54" height="54" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logo-bg" x1="0" y1="0" x2="54" y2="54" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#e8f0fe"/>
+      <stop offset="100%" stop-color="#c2d7ff"/>
+    </linearGradient>
+    <linearGradient id="logo-screen" x1="4" y1="5" x2="40" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#eef3ff"/>
+    </linearGradient>
+    <linearGradient id="logo-cam" x1="42" y1="13" x2="50" y2="27" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1a73e8"/>
+      <stop offset="100%" stop-color="#0d47a1"/>
+    </linearGradient>
+    <filter id="logo-shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1a73e8" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect width="54" height="54" rx="12" fill="url(#logo-bg)" filter="url(#logo-shadow)"/>
+
+  <!-- Screen / monitor body -->
+  <rect x="5" y="8" width="36" height="26" rx="3" fill="url(#logo-screen)" stroke="#c2d7ff" stroke-width="0.8"/>
+
+  <!-- Left person: head -->
+  <circle cx="14" cy="17" r="4" fill="#1a73e8" opacity="0.85"/>
+  <!-- Left person: body/shoulders -->
+  <path d="M7 31 Q7 25 14 25 Q21 25 21 31 Z" fill="#1a73e8" opacity="0.7"/>
+
+  <!-- Right person: head -->
+  <circle cx="28" cy="17" r="4" fill="#4285f4" opacity="0.85"/>
+  <!-- Right person: body/shoulders -->
+  <path d="M21 31 Q21 25 28 25 Q35 25 35 31 Z" fill="#4285f4" opacity="0.7"/>
+
+  <!-- Screen bottom divider -->
+  <rect x="5" y="31" width="36" height="3" fill="#e8f0fe"/>
+
+  <!-- Camera shape (right side) -->
+  <path d="M42 14 L50 11 L50 27 L42 24 Z" fill="url(#logo-cam)" rx="1"/>
+  <rect x="41" y="13" width="2" height="14" rx="1" fill="#1565c0"/>
+
+  <!-- Monitor stand -->
+  <rect x="20" y="34" width="14" height="2.5" rx="1" fill="#c2d7ff"/>
+  <rect x="17" y="36.5" width="20" height="2.5" rx="1.5" fill="#a8c4f5"/>
+
+  <!-- Mic indicator dots -->
+  <circle cx="22" cy="46" r="1.5" fill="#a8c4f5"/>
+  <circle cx="27" cy="46" r="2" fill="#1a73e8"/>
+  <circle cx="32" cy="46" r="1.5" fill="#a8c4f5"/>
 </svg>

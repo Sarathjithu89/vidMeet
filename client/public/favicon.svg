@@ -1,4 +1,40 @@
-<svg width="54" height="70" viewBox="0 0 54 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M24.386 8.817c4.972-4.868 12.948-4.785 17.816.186 4.869 4.971 4.785 12.948-.186 17.816q-.506.494-.987.867L23.508 9.794q.372-.481.878-.977M11.97 42.611c-4.941 4.9-4.974 12.877-.075 17.817 4.9 4.94 12.877 4.974 17.817.074q.502-.5.88-.975L12.96 41.747a10 10 0 0 0-.99.864" fill="#fff"/>
-  <rect y="22.652" width="21.312" height="55.056" rx="10.656" transform="rotate(-45 0 22.652)" fill="#fff"/>
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="fav-bg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#e8f0fe"/>
+      <stop offset="100%" stop-color="#c2d7ff"/>
+    </linearGradient>
+    <linearGradient id="fav-screen" x1="2" y1="4" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#eef3ff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect width="32" height="32" rx="7" fill="url(#fav-bg)"/>
+
+  <!-- Video screen -->
+  <rect x="3" y="5" width="20" height="15" rx="2" fill="url(#fav-screen)" stroke="#c2d7ff" stroke-width="0.6"/>
+
+  <!-- Left person: head -->
+  <circle cx="9" cy="10" r="2.5" fill="#1a73e8" opacity="0.85"/>
+  <!-- Left person: body -->
+  <path d="M4.5 19.5 Q4.5 15 9 15 Q13.5 15 13.5 19.5 Z" fill="#1a73e8" opacity="0.7"/>
+
+  <!-- Right person: head -->
+  <circle cx="17" cy="10" r="2.5" fill="#4285f4" opacity="0.85"/>
+  <!-- Right person: body -->
+  <path d="M12.5 19.5 Q12.5 15 17 15 Q21.5 15 21.5 19.5 Z" fill="#4285f4" opacity="0.7"/>
+
+  <!-- Camera shape (right side) -->
+  <path d="M24 8 L29 6 L29 19 L24 17 Z" fill="#1a73e8" opacity="0.9"/>
+  <rect x="23" y="8" width="1.5" height="10" rx="0.75" fill="#0d47a1"/>
+
+  <!-- Stand -->
+  <rect x="11" y="20" width="10" height="1.8" rx="0.9" fill="#c2d7ff"/>
+  <rect x="9" y="21.8" width="14" height="1.8" rx="1" fill="#a8c4f5"/>
+
+  <!-- Live dot (blue on light theme) -->
+  <circle cx="27.5" cy="5.5" r="2" fill="#1a73e8"/>
+  <circle cx="27.5" cy="5.5" r="1" fill="#ffffff" opacity="0.6"/>
 </svg>
