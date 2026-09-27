@@ -1,7 +1,14 @@
 import React from "react";
 
 const Footer = () => {
-  return <div>Footer</div>;
+  return (
+    <footer className="w-full max-w-305 mx-auto bg-white/10 backdrop:blur xl:rounded-t-xl px-6 py-4 text-center">
+      <p className="text-xs font-medium text-black">
+        {" "}
+        2026 VidMeed . All rights reserved.
+      </p>
+    </footer>
+  );
 };
 
 export default Footer;
