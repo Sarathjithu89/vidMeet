@@ -6,7 +6,7 @@ import Loader from "./Loader";
 const ProtectedRoute = () => {
   const { isLoaded, isSignedIn } = useAuth();
   if (!isLoaded) {
-    return <Loader text="Authenticating..." />;
+    return <Loader text="Loading..." />;
   }
   if (!isSignedIn) {
     return <Navigate to="/login" replace />;
