@@ -1,5 +1,7 @@
 import { XIcon } from "lucide-react";
 import React, { useState } from "react";
+import SessionParticipantsTab from "./SessionParticipantsTab";
+import SessionChatTab from "./SessionChatTab";
 
 const SessionDetailModal = ({ session, onClose }) => {
   const [activeTab, setActiveTab] = useState("chat");
@@ -53,7 +55,16 @@ const SessionDetailModal = ({ session, onClose }) => {
           </button>
         </div>
         {/* Tab Content */}
-        <div className="flex-1 p-6 overflow-y-auto min-h-75"></div>
+        <div className="flex-1 p-6 overflow-y-auto min-h-75">
+          {activeTab === "chat" ? (
+            <SessionChatTab messages={session.messages} />
+          ) : (
+            <SessionParticipantsTab
+              participants={session.participants}
+              host={session.host}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

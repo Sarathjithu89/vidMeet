@@ -48,7 +48,7 @@ const MeetingRoom = () => {
   };
 
   return (
-    <div className="h-screen w-screen bg-slate-900 flex flex-col overflow-hidden relative font-sans">
+    <div className="h-screen w-screen bg-slate-200 flex flex-col overflow-hidden relative font-sans">
       {/* Top bar */}
       <header className="w-full bg-white/90 backdrop-blur-md px-6 py-3 border-b border-slate-200 flex items-center justify-between z-30 shadow-xs">
         <div className="flex items-center gap-3">
