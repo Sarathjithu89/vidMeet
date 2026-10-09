@@ -10,7 +10,7 @@ const app = express();
 const allowedOrigins = process.env.ORIGINS.split(",");
 
 //connect to Neon and init Tables
-initDB();
+await initDB();
 
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(cookieParser());
