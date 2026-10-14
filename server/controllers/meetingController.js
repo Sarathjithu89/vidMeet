@@ -70,7 +70,8 @@ export const createMeeting = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("createMeeting failed:", error);
+    res.status(500).json({ error: "Failed to create meeting" });
   }
 };
 
@@ -103,7 +104,8 @@ export const getMeeting = (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("fetchMeetings failed:", error);
+    res.status(500).json({ error: "Failed to fetch Meeting details" });
   }
 };
 
@@ -163,7 +165,8 @@ export const getUserSessions = async (req, res) => {
     );
     res.json({ meetings: formattedMeetings });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("fetch sessions failed:", error);
+    res.status(500).json({ error: "Failed to fetch user Sessions" });
   }
 };
 
@@ -171,6 +174,7 @@ export const getUserSessions = async (req, res) => {
 export const getSessionDetails = async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.user.id;
     const meetings = await sql`
     SELECT m.*,
     u.id AS host_user_id,
@@ -182,6 +186,16 @@ export const getSessionDetails = async (req, res) => {
       return res.status(404).json({ error: "Session details not found!" });
     }
     const m = meetings[0];
+
+    if (m.host_id !== userId) {
+      const membership = await sql`
+      SELECT 1 FROM meeting_participants
+      WHERE meeting_id=${m.id} AND user_id=${userId} LIMIT 1`;
+      if (membership.length === 0) {
+        return res.status(404).json({ error: "Session details not found" });
+      }
+    }
+
     const participants = await sql`
     SELECT mp.*,u.email
     FROM meetings_participants mp
@@ -222,7 +236,8 @@ export const getSessionDetails = async (req, res) => {
     };
     res.json({ meeting: formattedMeeting });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("fetch sessionDetails failed:", error);
+    res.status(500).json({ error: "Failed to Session Details" });
   }
 };
 
@@ -248,6 +263,7 @@ export const getMeetingStats = async (req, res) => {
       maxParticipants: plan === "premium" ? 100 : 10,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("fetch meeting stats failed:", error);
+    res.status(500).json({ error: "Failed fetch Meetings stats" });
   }
 };
