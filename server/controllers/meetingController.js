@@ -76,10 +76,19 @@ export const createMeeting = async (req, res) => {
 };
 
 //get meeting by id
-export const getMeeting = (req, res) => {
+export const getMeeting = async (req, res) => {
   try {
     const { meetingId } = req.params;
-    const meetings = await`SELECT m.*,u.id as host_user_id,u.name as host_name,u.email as host_email FROM meetings m JOIN users u ON m.host_id=u.id WHERE m.meeting_id=${meetingId}`;
+    const meetings = await sql`
+    SELECT
+    m.*,
+    u.id AS host_user_id,
+    u.name AS host_name,
+    u.email AS host_email
+    FROM meetings m
+   JOIN users u ON m.host_id = u.id
+    sWHERE m.meeting_id = ${meetingId}
+`;
     if (meetings.length === 0) {
       return res.status(404).json({ error: "Meeting not found" });
     }
