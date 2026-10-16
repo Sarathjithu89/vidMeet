@@ -7,11 +7,14 @@ export function setupSocketIO(io) {
   io.on("connection", (socket) => {
     let currentRoomId = null;
     let currentUser = null;
+    let hasJoined = false;
 
     //user joins a meetingroom
     socket.on(
       "join-room",
       async ({ roomId, user, audioEnabled = true, videoEnabled = true }) => {
+        if (hasJoined) return;
+        hasJoined = true;
         try {
           //verify meeting status form DB
           const meetings = await sql`
@@ -67,16 +70,28 @@ export function setupSocketIO(io) {
           roomParticipants.set(socket.id, currentUser);
 
           //save participants into DB if not present
-          const userId = user?.id || null;
+          const rawUserId = user?.id || null;
+
+          // Guard against FK violation: Clerk webhook may not have synced this user yet.
+          // If the user row doesn't exist in users table, store them as a guest (user_id = null).
+          let dbUserId = null;
+          if (rawUserId) {
+            const userExists = await sql`SELECT id FROM users WHERE id = ${rawUserId}`;
+            dbUserId = userExists.length > 0 ? rawUserId : null;
+          }
+
+          // Persist the verified DB user ID on currentUser for reuse in other handlers
+          currentUser.dbUserId = dbUserId;
+
           const existingParticipants = await sql`
           SELECT id FROM meeting_participants
           WHERE meeting_id=${meeting.id}
-          AND ((${userId}::text IS NOT NULL AND user_id=${userId}) OR name =${currentUser.userName})`;
+          AND ((${dbUserId}::text IS NOT NULL AND user_id=${dbUserId}) OR name =${currentUser.userName})`;
 
           if (existingParticipants.length === 0) {
             await sql`
             INSERT INTO meeting_participants (meeting_id,user_id,name,joined_at)
-            VALUES(${meeting.id},${userId},${currentUser.userName},NOW())`;
+            VALUES(${meeting.id},${dbUserId},${currentUser.userName},NOW())`;
           }
 
           //send the list of existing users to the newcommer
@@ -149,18 +164,39 @@ export function setupSocketIO(io) {
     //chat message event --> persist to DB & brodcast
     socket.on("send-message", async ({ roomId, message }) => {
       try {
+        if (
+          !message?.text ||
+          typeof message.text !== "string" ||
+          message.text.trim().length === 0
+        ) {
+          return;
+        }
+
+        const trimmedText = message.text.trim();
+        if (trimmedText.length > 2000) {
+          socket.emit("message-error", {
+            error: "Message is too long (maximum 2000 characters).",
+          });
+          return;
+        }
+
         const meetings = await sql`
         SELECT id,status FROM meetings WHERE meeting_id=${roomId}`;
         if (meetings.length > 0 && meetings[0].status !== "ended") {
           const meetingId = meetings[0].id;
-          const senderId = message.senderId || null;
 
+          // Use the verified dbUserId resolved at join-room time (null if user wasn't in users table yet)
+          // to avoid FK constraint violation on meeting_messages_sender_id_fkey
+          const senderId = currentUser?.dbUserId ?? null;
+
+          const senderName = message.senderName || "Anonymous";
           await sql`
           INSERT INTO meeting_messages(meeting_id,sender_id,sender_name,text,timestamp)
-          VALUES(${meetingId},${senderId},${message.senderName}||"Anonymous",${message.text},NOW())`;
+          VALUES(${meetingId},${senderId},${senderName},${trimmedText},NOW())`;
 
           io.in(roomId).emit("receive-message", {
             ...message,
+            text: trimmedText,
             senderSocketId: socket.id,
           });
         }
@@ -172,12 +208,28 @@ export function setupSocketIO(io) {
     //Host ends meeting for all via end meeting button
     socket.on("end-meeting", async ({ roomId }) => {
       try {
+        const meetings = await sql`
+        SELECT host_id FROM meetings WHERE meeting_id=${roomId}`;
+        if (meetings.length === 0) return;
+
+        const isActualHost =
+          currentUser?.userId &&
+          meetings[0].host_id &&
+          meetings[0].host_id.toString() === currentUser.userId.toString();
+
+        if (!isActualHost) {
+          socket.emit("meeting-ended", {
+            message: "Unauthorized: Only the host can end the meeting.",
+          });
+          return;
+        }
+
         await sql`
         UPDATE meetings
         SET status='ended',ended_at=NOW()
         WHERE meeting_id=${roomId}`;
 
-        io.on(roomId).emit("meeting-ended", {
+        io.to(roomId).emit("meeting-ended", {
           message: "The meeting has been ended by the Host.",
         });
         rooms.delete(roomId);
@@ -186,8 +238,26 @@ export function setupSocketIO(io) {
       }
     });
 
-    //Handle Disconnect(Reloadinwindow,network drop or closing tab)
-    socket.on("disconnect", () => {
+    //Handle Disconnect(Reloading window, network drop or closing tab)
+    socket.on("disconnect", async () => {
+      if (currentRoomId && currentUser) {
+        try {
+          const meetings = await sql`SELECT id FROM meetings WHERE meeting_id=${currentRoomId}`;
+          if (meetings.length > 0) {
+            const meetingDbId = meetings[0].id;
+            const userId = currentUser.dbUserId || null;
+            await sql`
+              UPDATE meeting_participants
+              SET left_at = NOW()
+              WHERE meeting_id = ${meetingDbId}
+              AND ((${userId}::text IS NOT NULL AND user_id = ${userId}) OR name = ${currentUser.userName})
+              AND left_at IS NULL`;
+          }
+        } catch (dbErr) {
+          console.error("Error updating left_at timestamp on disconnect:", dbErr);
+        }
+      }
+
       if (currentRoomId && rooms.has(currentRoomId)) {
         const roomParticipants = rooms.get(currentRoomId);
         roomParticipants.delete(socket.id);

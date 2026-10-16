@@ -13,7 +13,7 @@ const ChatPanel = ({
 
   useEffect(() => {
     if (isOpen) {
-      messagesEndRef.current?.scrollIntoView({ behaviour: "smooth" });
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isOpen]);
 
@@ -81,7 +81,7 @@ const ChatPanel = ({
       >
         <input
           type="text"
-          placeholder="Type a message..."
+          placeholder="Type a message... (Enter to send)"
           value={text}
           onChange={(e) => setText(e.target.value)}
           className="flex-1 bg-white border border-primary-border/80 focus:border-primary rounded-xl px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 outline-none transition-all shadow-xs"

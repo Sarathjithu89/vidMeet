@@ -87,7 +87,7 @@ const ControlBar = ({
 
         <button
           onClick={onToggleChat}
-          className={`p-3.5 rounded-2xl transition-all cursor-pointer border ${isChatOpen ? "bg-primary text-white border-primary shadow-md shadow-primary/20" : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300 shadow-xs"}`}
+          className={`relative p-3.5 rounded-2xl transition-all cursor-pointer border ${isChatOpen ? "bg-primary text-white border-primary shadow-md shadow-primary/20" : "bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300 shadow-xs"}`}
           title="Toggle In-Meeting Chat"
         >
           <MessageSquareIcon className="w-5 h-5" />

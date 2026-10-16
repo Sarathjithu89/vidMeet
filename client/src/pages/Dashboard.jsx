@@ -5,21 +5,27 @@ import {
   PlusIcon,
   ShieldCheckIcon,
 } from "lucide-react";
-import { dummyStats, dummyUser } from "../assets/asset";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "@clerk/react";
+import { useAuth, useUser } from "@clerk/react";
+import api from "../config/api.js";
 
 const Dashboard = () => {
   const { user } = useUser();
-  const userName = user.fullName;
-  const userEmail = user.primaryEmailAddress.emailAddress;
+  const userName =
+    user.fullName ||
+    user.firstName ||
+    user.primaryEmailAddress?.emailAddress?.split("@")[0] ||
+    "User";
+  const userEmail = user.primaryEmailAddress?.emailAddress || "";
+
+  const { isLoaded, isSignedIn, getToken } = useAuth();
 
   const navigate = useNavigate();
 
-  const [isCreationg, setIsCreating] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const stats = dummyStats;
+  const [stats, setStats] = useState(null);
 
   const [joinId, setJoinId] = useState("");
 
@@ -28,31 +34,59 @@ const Dashboard = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const handleCreateMeeting = () => {
-    setIsCreating(true);
-    const chars = "abcdefghijklmnopqrstuvwxyz";
-    const seg = () =>
-      Array.from(
-        { length: 3 },
-        () => chars[Math.floor(Math.random() * chars.length)],
-      ).join("");
-    const newMeetingId = `${seg()}-${seg()}-${seg()}`;
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!isLoaded || !isSignedIn) return;
+      try {
+        const token = await getToken();
+        const { data } = await api.get("/api/meetings/stats", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setStats(data);
+      } catch (error) {
+        toast.error(error.response?.data?.error || error.message);
+      }
+    };
+    fetchStats();
+  }, [isLoaded, isSignedIn, getToken]);
 
-    setTimeout(() => {
+  const handleCreateMeeting = async () => {
+    if (!isLoaded || !isSignedIn) return;
+
+    setIsCreating(true);
+    try {
+      const token = await getToken();
+      const res = await api.post(
+        "/api/meetings",
+        { title: `${userName}'s Meeting` },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      const meetingId = res.data.meeting.meetingId;
+      toast.success("Meeting created!");
+      navigate(`/meeting/${meetingId}`);
+    } catch (error) {
+      toast.error(error.response?.data?.error || error.message);
+    } finally {
       setIsCreating(false);
-      toast.success("Meeting Created!");
-      navigate(`/meeting/${newMeetingId}`);
-    }, 400);
+    }
   };
 
-  const handleJoinMeeting = (e) => {
+  const handleJoinMeeting = async (e) => {
     e.preventDefault();
     const cleanId = joinId.trim();
     if (!/^[a-z]{3}(?:-[a-z]{3}){2}$/.test(cleanId)) {
       toast.error("Please Enter a Valid Meeting ID");
       return;
     }
-    navigate(`/meeting/${encodeURIComponent(cleanId)}`);
+    try {
+      const token = await getToken();
+      await api.get(`/api/meetings/${cleanId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      navigate(`/meeting/${cleanId}`);
+    } catch (error) {
+      toast.error("Meeting not found.Check the ID and try again.");
+    }
   };
 
   return (
@@ -76,11 +110,11 @@ const Dashboard = () => {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
               <button
                 className="bg-primary hover:bg-primary-hover text-white font-medium px-6 py-3.5 rounded-full shadow-md shadow-primary/20 flex items-center justify-center gap-2.5 transition-all cursor-pointer disabled:opacity-50"
-                disabled={isCreationg}
+                disabled={isCreating}
                 onClick={handleCreateMeeting}
               >
                 <PlusIcon className="w-5 h-5" />
-                <span>{isCreationg ? "...Creating" : "New Meeting"}</span>
+                <span>{isCreating ? "...Creating" : "New Meeting"}</span>
               </button>
 
               <form
