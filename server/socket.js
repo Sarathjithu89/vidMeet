@@ -67,16 +67,28 @@ export function setupSocketIO(io) {
           roomParticipants.set(socket.id, currentUser);
 
           //save participants into DB if not present
-          const userId = user?.id || null;
+          const rawUserId = user?.id || null;
+
+          // Guard against FK violation: Clerk webhook may not have synced this user yet.
+          // If the user row doesn't exist in users table, store them as a guest (user_id = null).
+          let dbUserId = null;
+          if (rawUserId) {
+            const userExists = await sql`SELECT id FROM users WHERE id = ${rawUserId}`;
+            dbUserId = userExists.length > 0 ? rawUserId : null;
+          }
+
+          // Persist the verified DB user ID on currentUser for reuse in other handlers
+          currentUser.dbUserId = dbUserId;
+
           const existingParticipants = await sql`
           SELECT id FROM meeting_participants
           WHERE meeting_id=${meeting.id}
-          AND ((${userId}::text IS NOT NULL AND user_id=${userId}) OR name =${currentUser.userName})`;
+          AND ((${dbUserId}::text IS NOT NULL AND user_id=${dbUserId}) OR name =${currentUser.userName})`;
 
           if (existingParticipants.length === 0) {
             await sql`
             INSERT INTO meeting_participants (meeting_id,user_id,name,joined_at)
-            VALUES(${meeting.id},${userId},${currentUser.userName},NOW())`;
+            VALUES(${meeting.id},${dbUserId},${currentUser.userName},NOW())`;
           }
 
           //send the list of existing users to the newcommer
@@ -153,11 +165,15 @@ export function setupSocketIO(io) {
         SELECT id,status FROM meetings WHERE meeting_id=${roomId}`;
         if (meetings.length > 0 && meetings[0].status !== "ended") {
           const meetingId = meetings[0].id;
-          const senderId = message.senderId || null;
 
+          // Use the verified dbUserId resolved at join-room time (null if user wasn't in users table yet)
+          // to avoid FK constraint violation on meeting_messages_sender_id_fkey
+          const senderId = currentUser?.dbUserId ?? null;
+
+          const senderName = message.senderName || "Anonymous";
           await sql`
           INSERT INTO meeting_messages(meeting_id,sender_id,sender_name,text,timestamp)
-          VALUES(${meetingId},${senderId},${message.senderName}||${"Anonymous"},${message.text},NOW())`;
+          VALUES(${meetingId},${senderId},${senderName},${message.text},NOW())`;
 
           io.in(roomId).emit("receive-message", {
             ...message,

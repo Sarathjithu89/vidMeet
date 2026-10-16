@@ -14,8 +14,8 @@ export const useChat = (roomId, user) => {
 
   useEffect(() => {
     if (!roomId) return;
-    const handleReceiveMessage = () => {
-      setMessages((prev) => [...prev, messages]);
+    const handleReceiveMessage = (msg) => {
+      setMessages((prev) => [...prev, msg]);
       if (!isChatOpenRef.current) {
         setUnreadCount((prev) => prev + 1);
       }

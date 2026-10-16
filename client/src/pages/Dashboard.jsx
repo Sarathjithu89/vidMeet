@@ -12,8 +12,12 @@ import api from "../config/api.js";
 
 const Dashboard = () => {
   const { user } = useUser();
-  const userName = user.fullName;
-  const userEmail = user.primaryEmailAddress.emailAddress;
+  const userName =
+    user.fullName ||
+    user.firstName ||
+    user.primaryEmailAddress?.emailAddress?.split("@")[0] ||
+    "User";
+  const userEmail = user.primaryEmailAddress?.emailAddress || "";
 
   const { isLoaded, isSignedIn, getToken } = useAuth();
 
@@ -57,7 +61,7 @@ const Dashboard = () => {
         { title: `${userName}'s Meeting` },
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      const meetingId = res.data.meetingId;
+      const meetingId = res.data.meeting.meetingId;
       toast.success("Meeting created!");
       navigate(`/meeting/${meetingId}`);
     } catch (error) {

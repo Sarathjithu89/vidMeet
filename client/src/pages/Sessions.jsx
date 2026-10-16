@@ -43,7 +43,7 @@ const Sessions = () => {
       const res = await api.get(`/api/meetings/sessions/${sessionId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setSelectedSession(res.data.meetings);
+      setSelectedSession(res.data.meeting);
     } catch (_error) {
       toast.error("Could not fetch session details");
     }

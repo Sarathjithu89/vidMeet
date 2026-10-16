@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { dummyMeetingDetails, dummyUser } from "../assets/asset";
 import VideoGrid from "../components/meetings/VideoGrid";
 import { useWebRTC } from "../hooks/useWebRTC";
 import ChatPanel from "../components/meetings/ChatPanel";
@@ -18,8 +17,6 @@ const MeetingRoom = () => {
   const { user } = useUser();
   const { getToken } = useAuth();
 
-  console.log("Current URL:", window.location.pathname);
-  console.log("Meeting ID from route:", meetingId);
 
   const userData = useMemo(() => {
     if (!user) return null;
@@ -115,7 +112,7 @@ const MeetingRoom = () => {
   const handleEndMeeting = () => {
     endMeeting();
     toast("Meeting Ended for all Participants");
-    navigate("/dahsboard");
+    navigate("/dashboard");
   };
   if (loadingMeeting) {
     return <Loader text="Joining meeting room.." />;
@@ -127,8 +124,8 @@ const MeetingRoom = () => {
       <header className="w-full bg-white/90 backdrop-blur-md px-6 py-3 border-b border-slate-200 flex items-center justify-between z-30 shadow-xs">
         <div className="flex items-center gap-3">
           <h2 className="text-base font-semibold text-slate-900 tracking-tight">
-            {dummyMeetingDetails.title}(
-            {meetingId || dummyMeetingDetails.meetingId})
+            {meeting?.title || "Meeting"}(
+            {meetingId})
           </h2>
           <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
         </div>
@@ -159,13 +156,13 @@ const MeetingRoom = () => {
           localAudio={audioEnabled}
           localVideo={videoEnabled}
           remoteUsers={remoteUsers}
-          meetingHostId={dummyUser.id}
+          meetingHostId={hostId}
         />
       </div>
       {/* bottom floating control pannel */}
 
       <ControlBar
-        roomId={meetingId || dummyMeetingDetails.meetingId}
+        roomId={meetingId}
         audioEnabled={audioEnabled}
         videoEnabled={videoEnabled}
         onToggleAudio={toggleAudio}
