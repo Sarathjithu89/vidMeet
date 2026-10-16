@@ -40,13 +40,18 @@ export const createMeeting = async (req, res) => {
       }
     }
     let meetingId = generateMeetingId();
-    //check uniquie ID
+    //check unique ID
     let existing =
       await sql`SELECT id FROM meetings WHERE meeting_id=${meetingId}`;
-    while (existing.length > 0) {
+    let attempts = 0;
+    while (existing.length > 0 && attempts < 10) {
       meetingId = generateMeetingId();
       existing =
-        await sql`SELECT id FROM meetings WHERE meeting_Id=${meetingId}`;
+        await sql`SELECT id FROM meetings WHERE meeting_id=${meetingId}`;
+      attempts++;
+    }
+    if (attempts >= 10) {
+      return res.status(500).json({ error: "Could not generate a unique meeting ID" });
     }
     const [meeting] = await sql`
   INSERT INTO meetings (meeting_id, title, host_id, status)

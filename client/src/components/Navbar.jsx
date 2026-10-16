@@ -1,5 +1,5 @@
 import React from "react";
-import { dummyUser } from "../assets/asset";
+
 import { Link, useLocation } from "react-router-dom";
 
 import { AstroidIcon, HistoryIcon, LayoutDashboardIcon } from "lucide-react";
@@ -57,7 +57,7 @@ const Navbar = () => {
       {isSignedIn && (
         <div className="flex items-center gap-4">
           <Link
-            to="/session"
+            to="/sessions"
             className="md:hidden text-xs font-medium text-slate-600 hover:text-primary flex items-center gap-1"
           >
             <HistoryIcon className="w-4 h-4" />

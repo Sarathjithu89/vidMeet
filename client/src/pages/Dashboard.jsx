@@ -23,7 +23,7 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
 
-  const [isCreationg, setIsCreating] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [stats, setStats] = useState(null);
 
@@ -110,11 +110,11 @@ const Dashboard = () => {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
               <button
                 className="bg-primary hover:bg-primary-hover text-white font-medium px-6 py-3.5 rounded-full shadow-md shadow-primary/20 flex items-center justify-center gap-2.5 transition-all cursor-pointer disabled:opacity-50"
-                disabled={isCreationg}
+                disabled={isCreating}
                 onClick={handleCreateMeeting}
               >
                 <PlusIcon className="w-5 h-5" />
-                <span>{isCreationg ? "...Creating" : "New Meeting"}</span>
+                <span>{isCreating ? "...Creating" : "New Meeting"}</span>
               </button>
 
               <form
