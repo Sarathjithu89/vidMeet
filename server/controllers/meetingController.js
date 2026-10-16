@@ -18,7 +18,7 @@ export const createMeeting = async (req, res) => {
 
     //fetch user details & plan
     const users = await sql`SELECT name,plan FROM users WHERE id=${userId}`;
-    const userPlan = user[0]?.plan || "free";
+    const userPlan = users[0]?.plan || "free";
 
     //check meetings limit per calender month
     if (userPlan === "free") {
@@ -49,15 +49,23 @@ export const createMeeting = async (req, res) => {
         await sql`SELECT id FROM meetings WHERE meeting_Id=${meetingId}`;
     }
     const [meeting] = await sql`
-    INSERT INTO meetings(meeting_id,title,host_id,status)
-    VALUES (${meetingId},${title || "Instant Meeting"},${userId},"active")
-    RETURNING id, meeting_id,title,host_id,status,created_at`;
+  INSERT INTO meetings (meeting_id, title, host_id, status)
+  VALUES (
+    ${meetingId},
+    ${title || "Instant Meeting"},
+    ${userId},
+    ${"active"}
+  )
+  RETURNING id, meeting_id, title, host_id, status, created_at
+`;
 
     const hostName = users[0]?.name || "Host";
 
     //insert host into Participants
-    await sql`INSERT INTO meeting_participants(meeting_id,user_id,name)
-    VALUES(${meetingId},${userId},${hostName})`;
+    await sql`
+  INSERT INTO meeting_participants (meeting_id, user_id, name)
+  VALUES (${meeting.id}, ${userId}, ${hostName})
+`;
 
     res.status(201).json({
       meeting: {
@@ -87,7 +95,7 @@ export const getMeeting = async (req, res) => {
     u.email AS host_email
     FROM meetings m
    JOIN users u ON m.host_id = u.id
-    sWHERE m.meeting_id = ${meetingId}
+    WHERE m.meeting_id = ${meetingId}
 `;
     if (meetings.length === 0) {
       return res.status(404).json({ error: "Meeting not found" });
@@ -133,13 +141,14 @@ export const getUserSessions = async (req, res) => {
     const formattedMeetings = await Promise.all(
       meetings.map(async (m) => {
         const participants = await sql`
-        SELECT mp.*,u.email
-        FROM meetings_participants mp
-        LEFT JOIN users u ON mp.user_id=u.id
-        WHERE mp.meeting_id=${m.id}`;
+        SELECT mp.*, u.email
+        FROM meeting_participants mp
+        LEFT JOIN users u ON mp.user_id = u.id
+        WHERE mp.meeting_id = ${m.id}
+        `;
 
         const messages = await sql`
-        SELECT id,sender_id,sender_name,tex,timestamp
+        SELECT id,sender_id,sender_name,text,timestamp
         FROM meeting_messages
         WHERE meeting_id=${m.id}
         ORDER BY timestamp ASC`;

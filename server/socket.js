@@ -157,7 +157,7 @@ export function setupSocketIO(io) {
 
           await sql`
           INSERT INTO meeting_messages(meeting_id,sender_id,sender_name,text,timestamp)
-          VALUES(${meetingId},${senderId},${message.senderName}||"Anonymous",${message.text},NOW())`;
+          VALUES(${meetingId},${senderId},${message.senderName}||${"Anonymous"},${message.text},NOW())`;
 
           io.in(roomId).emit("receive-message", {
             ...message,
@@ -177,7 +177,7 @@ export function setupSocketIO(io) {
         SET status='ended',ended_at=NOW()
         WHERE meeting_id=${roomId}`;
 
-        io.on(roomId).emit("meeting-ended", {
+        io.to(roomId).emit("meeting-ended", {
           message: "The meeting has been ended by the Host.",
         });
         rooms.delete(roomId);
