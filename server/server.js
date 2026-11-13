@@ -12,7 +12,10 @@ import { setupSocketIO } from "./socket.js";
 
 const app = express();
 const server = http.createServer(app);
-const allowedOrigins = process.env.ORIGINS.split(",");
+const allowedOrigins = (process.env.ORIGINS || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 //connect to Neon and init Tables
 await initDB();

@@ -29,7 +29,6 @@ export const handleClerkWebhook = async (req, res) => {
             email=COALESCE(NULLIF(EXCLUDED.email,''),users.email),
             name = EXCLUDED.name,
             image = EXCLUDED.image,
-            plan = EXCLUDED.plan,
             updated_at = NOW()`;
         break;
       }

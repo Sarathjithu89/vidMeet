@@ -30,25 +30,16 @@ const MeetingRoom = () => {
       email: user.primaryEmailAddress?.emailAddress || "",
       image: user.imageUrl || "",
     };
-  }, [
-    user?.id,
-    user?.fullName,
-    user?.firstName,
-    user?.primaryEmailAddress?.emailAddress,
-    user?.imageUrl,
-  ]);
+  }, [user]);
 
   const [meeting, setMeeting] = useState(null);
-  const [loadingMeeting, setLoadingMeeting] = useState(true);
+  const [loadingMeeting, setLoadingMeeting] = useState(Boolean(meetingId));
   const [isParticipantsOpen, setIsParticipantsOpen] = useState(false);
 
   //fetch meeting details to verify validity before enabling WebRTC camera access
 
   useEffect(() => {
-    if (!meetingId) {
-      setLoadingMeeting(false);
-      return;
-    }
+    if (!meetingId) return;
 
     const fetchMeeting = async () => {
       try {
@@ -93,7 +84,13 @@ const MeetingRoom = () => {
     toggleAudio,
     toggleVideo,
     endMeeting,
-  } = useWebRTC(meetingId, userData, handleMeetingEnded);
+  } = useWebRTC(
+    meetingId,
+    userData,
+    handleMeetingEnded,
+    getToken,
+    Boolean(meeting && userData),
+  );
 
   //initialize Chat
   const { messages, sendMessage, unreadCount, isChatOpen, toggleChat } =

@@ -84,7 +84,7 @@ const Dashboard = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       navigate(`/meeting/${cleanId}`);
-    } catch (error) {
+    } catch {
       toast.error("Meeting not found.Check the ID and try again.");
     }
   };
