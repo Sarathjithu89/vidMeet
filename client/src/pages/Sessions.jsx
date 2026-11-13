@@ -28,7 +28,7 @@ const Sessions = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSessions(res.data.meetings || []);
-      } catch (_error) {
+      } catch {
         toast.error("Failed to load meeting sessions");
       } finally {
         setLoading(false);
@@ -44,7 +44,7 @@ const Sessions = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSelectedSession(res.data.meeting);
-    } catch (_error) {
+    } catch {
       toast.error("Could not fetch session details");
     }
   };

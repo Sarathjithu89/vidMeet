@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 import { socket } from "../config/socket";
 
@@ -20,9 +21,14 @@ export const useChat = (roomId, user) => {
         setUnreadCount((prev) => prev + 1);
       }
     };
+    const handleMessageError = ({ error } = {}) => {
+      toast.error(error || "Your message could not be sent");
+    };
     socket.on("receive-message", handleReceiveMessage);
+    socket.on("message-error", handleMessageError);
     return () => {
       socket.off("receive-message", handleReceiveMessage);
+      socket.off("message-error", handleMessageError);
     };
   }, [roomId]);
 
@@ -41,7 +47,7 @@ export const useChat = (roomId, user) => {
       };
       socket.emit("send-message", { roomId, message });
     },
-    [roomId, user?.id, user?.name],
+    [roomId, user],
   );
   const toggleChat = useCallback(() => {
     setIsChatOpen((prev) => {

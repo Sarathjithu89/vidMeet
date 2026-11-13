@@ -1,36 +1,42 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Toaster } from "react-hot-toast";
 import { Navigate, Route, Routes } from "react-router-dom";
-import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedLayout from "./components/ProtectedLayout";
-import Dashboard from "./pages/Dashboard";
-import Sessions from "./pages/Sessions";
-import Pricing from "./pages/Pricing";
-import MeetingRoom from "./pages/MeetingRoom";
+import Loader from "./components/Loader";
+
+// Route-level code splitting keeps the first paint small for the landing page.
+const Landing = lazy(() => import("./pages/Landing"));
+const Login = lazy(() => import("./pages/Login"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Sessions = lazy(() => import("./pages/Sessions"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const MeetingRoom = lazy(() => import("./pages/MeetingRoom"));
 
 const App = () => {
   return (
     <>
       <Toaster />
-      <Routes>
-        {/* Public Routes */}
+      <Suspense fallback={<Loader text="Loading..." />}>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login mode="login" />} />
+          <Route path="/register" element={<Login mode="register" />} />
 
-        <Route path="/login" element={<Login mode="login" />} />
-        <Route path="/register" element={<Login mode="register" />} />
-
-        {/* Private Routes */}
-        <Route element={<ProtectedRoute />}>
-          <Route element={<ProtectedLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/sessions" element={<Sessions />} />
-            <Route path="/pricing" element={<Pricing />} />
+          {/* Private Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route element={<ProtectedLayout />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/sessions" element={<Sessions />} />
+              <Route path="/pricing" element={<Pricing />} />
+            </Route>
+            <Route path="/meeting/:meetingId" element={<MeetingRoom />} />
           </Route>
-          <Route path="/meeting/:meetingId" element={<MeetingRoom />} />
-        </Route>
-        {/* Other Routes */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
+          {/* Other Routes */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </>
   );
 };

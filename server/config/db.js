@@ -53,6 +53,25 @@ export async function initDB() {
                 timestamp TIMESTAMPTZ DEFAULT NOW()
             );
         `;
+
+    // Foreign key columns are not indexed automatically in Postgres.
+    // These indexes keep joins, participant lookups and chat history fast.
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_meeting_participants_meeting
+      ON meeting_participants(meeting_id);
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_meeting_participants_user
+      ON meeting_participants(user_id);
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_meeting_messages_meeting
+      ON meeting_messages(meeting_id);
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_meetings_host
+      ON meetings(host_id);
+    `;
   } catch (error) {
     console.error("Erron initializing database tables", error);
     throw error;
